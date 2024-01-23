@@ -1,5 +1,4 @@
-import unittest
-
+from snowflake.cli.api.project.definition_manager import DefinitionManager
 from snowflake.cli.plugins.nativeapp.constants import SPECIAL_COMMENT
 from snowflake.cli.plugins.nativeapp.exceptions import (
     CouldNotDropApplicationPackageWithVersions,
@@ -9,7 +8,6 @@ from snowflake.cli.plugins.nativeapp.manager import SnowflakeSQLExecutionError
 from snowflake.cli.plugins.nativeapp.teardown_processor import (
     NativeAppTeardownProcessor,
 )
-from snowflake.cli.api.project.definition_manager import DefinitionManager
 from snowflake.connector import ProgrammingError
 from snowflake.connector.cursor import DictCursor
 
@@ -97,7 +95,7 @@ def test_drop_generic_object_failure_w_exception(mock_execute, temp_dir, mock_cu
 
 # Test drop_application() when no application exists
 @mock.patch(TEARDOWN_PROCESSOR_GET_EXISTING_APP_INFO, return_value=None)
-@mock.patch(f"{TEARDOWN_MODULE}.print")
+@mock.patch(f"{TEARDOWN_MODULE}.cli_console.step")
 @pytest.mark.parametrize(
     "auto_yes_param",
     [True, False],  # This should have no effect on the test
@@ -254,7 +252,7 @@ def test_drop_application_has_special_comment_and_quoted_name(
 @mock.patch(TEARDOWN_PROCESSOR_IS_CORRECT_OWNER, return_value=True)
 @mock.patch(TEARDOWN_PROCESSOR_DROP_GENERIC_OBJECT, return_value=None)
 @mock.patch(f"{TEARDOWN_MODULE}.{TYPER_CONFIRM}", return_value=False)
-@mock.patch(f"{TEARDOWN_MODULE}.print")
+@mock.patch(f"{TEARDOWN_MODULE}.cli_console.step")
 def test_drop_application_user_prohibits_drop(
     mock_log_info,
     mock_confirm,
@@ -389,7 +387,7 @@ def test_drop_application_idempotent(
     TEARDOWN_PROCESSOR_GET_EXISTING_APP_PKG_INFO,
     return_value=None,
 )
-@mock.patch(f"{TEARDOWN_MODULE}.print")
+@mock.patch(f"{TEARDOWN_MODULE}.cli_console.step")
 @pytest.mark.parametrize(
     "auto_yes_param",
     [True, False],  # This should have no effect on the test
@@ -496,7 +494,7 @@ def test_show_versions_failure_w_exception(
 @mock.patch(TEARDOWN_PROCESSOR_GET_EXISTING_APP_PKG_INFO)
 @mock.patch(TEARDOWN_PROCESSOR_IS_CORRECT_OWNER, return_value=True)
 @mock.patch(NATIVEAPP_MANAGER_EXECUTE)
-@mock.patch(f"{TEARDOWN_MODULE}.print")
+@mock.patch(f"{TEARDOWN_MODULE}.cli_console.step")
 @mock_get_app_pkg_distribution_in_sf()
 @mock.patch(NATIVEAPP_MANAGER_IS_APP_PKG_DISTRIBUTION_SAME, return_value=True)
 @mock.patch(f"{TEARDOWN_MODULE}.{TYPER_CONFIRM}", return_value=False)
@@ -555,7 +553,7 @@ def test_drop_package_no_mismatch_no_drop(
 @mock.patch(TEARDOWN_PROCESSOR_GET_EXISTING_APP_PKG_INFO)
 @mock.patch(TEARDOWN_PROCESSOR_IS_CORRECT_OWNER, return_value=True)
 @mock.patch(NATIVEAPP_MANAGER_EXECUTE)
-@mock.patch(f"{TEARDOWN_MODULE}.print")
+@mock.patch(f"{TEARDOWN_MODULE}.cli_console.step")
 @mock_get_app_pkg_distribution_in_sf()
 @mock.patch(NATIVEAPP_MANAGER_IS_APP_PKG_DISTRIBUTION_SAME)
 @mock.patch(f"{TEARDOWN_MODULE}.{TYPER_CONFIRM}", return_value=True)
@@ -632,7 +630,7 @@ def test_drop_package_variable_mismatch_allowed_user_allows_drop(
 @mock_get_app_pkg_distribution_in_sf()
 @mock.patch(NATIVEAPP_MANAGER_IS_APP_PKG_DISTRIBUTION_SAME)
 @mock.patch(TEARDOWN_PROCESSOR_DROP_GENERIC_OBJECT, return_value=None)
-@mock.patch(f"{TEARDOWN_MODULE}.print")
+@mock.patch(f"{TEARDOWN_MODULE}.cli_console.step")
 @pytest.mark.parametrize(
     "auto_yes_param, is_pkg_distribution_same",  # auto_yes_param should have no effect on the test
     [(True, True), (True, False), (False, True), (False, False)],
@@ -780,7 +778,8 @@ def test_drop_package_variable_mistmatch_w_special_comment_quoted_name_auto_drop
 @mock_get_app_pkg_distribution_in_sf()
 @mock.patch(NATIVEAPP_MANAGER_IS_APP_PKG_DISTRIBUTION_SAME)
 @mock.patch(f"{TEARDOWN_MODULE}.{TYPER_CONFIRM}", return_value=False)
-@mock.patch(f"{TEARDOWN_MODULE}.print")
+# @mock.patch(f"{TEARDOWN_MODULE}.print")
+@mock.patch(f"{TEARDOWN_MODULE}.cli_console.step")
 @pytest.mark.parametrize("is_pkg_distribution_same", [True, False])
 def test_drop_package_variable_mistmatch_no_special_comment_user_prohibits_drop(
     mock_log_warning,
