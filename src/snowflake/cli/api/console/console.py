@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
+from logging import getLogger
 from typing import Optional
 
 from rich.style import Style
@@ -12,6 +13,8 @@ PHASE_STYLE: Style = Style(color="grey93", bold=True)
 STEP_STYLE: Style = Style(color="grey89", italic=True)
 IMPORTANT_STYLE: Style = Style(color="red", bold=True, italic=True)
 INDENTATION_LEVEL: int = 2
+
+logger = getLogger(__name__)
 
 
 class CliConsoleNestingProhibitedError(RuntimeError):
@@ -45,6 +48,7 @@ class CliConsole(AbstractConsole):
         if self.in_phase:
             raise CliConsoleNestingProhibitedError("Only one phase allowed at a time.")
         self._print(self._format_message(enter_message, Output.PHASE))
+        logger.info(enter_message, stacklevel=2)
         self._in_phase = True
 
         yield self.step
@@ -52,15 +56,18 @@ class CliConsole(AbstractConsole):
         self._in_phase = False
         if exit_message:
             self._print(self._format_message(exit_message, Output.PHASE))
+            logger.info(exit_message, stacklevel=2)
 
     def step(self, message: str):
         """Displays 2 spaces indented message with STEP style."""
         text = self._format_message(message, Output.STEP)
+        logger.info(message, stacklevel=2)
         self._print(text)
 
     def warning(self, message: str):
         """Displays unindented message formated with IMPORTANT style."""
         text = self._format_message(message, Output.IMPORTANT)
+        logger.info(message, stacklevel=2)
         self._print(text)
 
 

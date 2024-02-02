@@ -59,7 +59,7 @@ class NativeAppRunProcessor(NativeAppManager, NativeAppCommandProcessor):
             # 2. Check distribution of the existing app package
             actual_distribution = self.get_app_pkg_distribution_in_snowflake
             if not self.verify_project_distribution(actual_distribution):
-                cli_console.phase(
+                cli_console.step(
                     f"Continuing to execute `snow app run` on app pkg {self.package_name} with distribution '{actual_distribution}'."
                 )
 
@@ -74,7 +74,7 @@ class NativeAppRunProcessor(NativeAppManager, NativeAppCommandProcessor):
 
         # If no app pkg pre-exists, create an app pkg, with the specified distribution in the project definition file.
         with self.use_role(self.package_role):
-            cli_console.phase(
+            cli_console.step(
                 f"Creating new application package {self.package_name} in account."
             )
             self._execute_query(
@@ -162,7 +162,7 @@ class NativeAppRunProcessor(NativeAppManager, NativeAppCommandProcessor):
                 # If all the above checks are in order, proceed to upgrade
                 try:
                     if diff.has_changes():
-                        cli_console.phase(
+                        cli_console.step(
                             f"Upgrading existing application {self.app_name}."
                         )
                         self._execute_query(
@@ -180,36 +180,39 @@ class NativeAppRunProcessor(NativeAppManager, NativeAppCommandProcessor):
                     generic_sql_error_handler(err)
 
             # 4. If no existing application is found, create an app using "loose files" / stage dev mode.
-            cli_console.phase(f"Creating new application {self.app_name} in account.")
+            with cli_console.phase(
+                f"Creating new application {self.app_name} in account.",
+                f"Application {self.app_name} created in accout.",
+            ):
 
-            if self.app_role != self.package_role:
-                with self.use_role(new_role=self.package_role):
-                    self._execute_queries(
+                if self.app_role != self.package_role:
+                    with self.use_role(new_role=self.package_role):
+                        self._execute_queries(
+                            dedent(
+                                f"""\
+                            grant install, develop on application package {self.package_name} to role {self.app_role};
+                            grant usage on schema {self.package_name}.{self.stage_schema} to role {self.app_role};
+                            grant read on stage {self.stage_fqn} to role {self.app_role};
+                            """
+                            )
+                        )
+
+                stage_name = StageManager.quote_stage_name(self.stage_fqn)
+
+                try:
+                    self._execute_query(
                         dedent(
                             f"""\
-                        grant install, develop on application package {self.package_name} to role {self.app_role};
-                        grant usage on schema {self.package_name}.{self.stage_schema} to role {self.app_role};
-                        grant read on stage {self.stage_fqn} to role {self.app_role};
+                        create application {self.app_name}
+                            from application package {self.package_name}
+                            using {stage_name}
+                            debug_mode = {self.debug_mode}
+                            comment = {SPECIAL_COMMENT}
                         """
                         )
                     )
-
-            stage_name = StageManager.quote_stage_name(self.stage_fqn)
-
-            try:
-                self._execute_query(
-                    dedent(
-                        f"""\
-                    create application {self.app_name}
-                        from application package {self.package_name}
-                        using {stage_name}
-                        debug_mode = {self.debug_mode}
-                        comment = {SPECIAL_COMMENT}
-                    """
-                    )
-                )
-            except ProgrammingError as err:
-                generic_sql_error_handler(err)
+                except ProgrammingError as err:
+                    generic_sql_error_handler(err)
 
     def get_all_existing_versions(self) -> SnowflakeCursor:
         """
@@ -238,7 +241,7 @@ class NativeAppRunProcessor(NativeAppManager, NativeAppCommandProcessor):
                     show_obj_query, cursor_class=DictCursor
                 )
             except ProgrammingError as err:
-                if err.msg.__contains__("does not exist or not authorized"):
+                if err.msg and "does not exists or not authorized" in err.msg:
                     raise ApplicationPackageDoesNotExistError(self.package_name)
                 else:
                     generic_sql_error_handler(err=err, role=self.package_role)
@@ -262,10 +265,10 @@ class NativeAppRunProcessor(NativeAppManager, NativeAppCommandProcessor):
         )
         if not policy.should_proceed(user_prompt):
             if is_interactive:
-                cli_console.phase("Not upgrading the application.")
+                cli_console.warning("Not upgrading the application.")
                 raise typer.Exit(0)
             else:
-                cli_console.phase(
+                cli_console.warning(
                     "Cannot upgrade the application non-interactively without --force."
                 )
                 raise typer.Exit(1)
@@ -324,40 +327,43 @@ class NativeAppRunProcessor(NativeAppManager, NativeAppCommandProcessor):
                     if err.errno not in UPGRADE_RESTRICTION_CODES:
                         generic_sql_error_handler(err=err)
                     else:  # The existing app was created from a different process.
-                        cli_console.phase(err.msg)
+                        cli_console.warning(err.msg)
                         self.drop_application_before_upgrade(policy, is_interactive)
 
             # 4. With no (more) existing applications, create an app using the release directives
-            cli_console.phase(f"Creating new application {self.app_name} in account.")
+            with cli_console.phase(
+                f"Creating new application {self.app_name} in account.",
+                f"Applicatio {self.app_name} created in account.",
+            ):
 
-            if self.app_role != self.package_role:
-                with self.use_role(new_role=self.package_role):
-                    self._execute_query(
-                        f"grant install on application package {self.package_name} to role {self.app_role}"
-                    )
-                    if version:
+                if self.app_role != self.package_role:
+                    with self.use_role(new_role=self.package_role):
                         self._execute_query(
-                            f"grant develop on application package {self.package_name} to role {self.app_role}"
+                            f"grant install on application package {self.package_name} to role {self.app_role}"
                         )
+                        if version:
+                            self._execute_query(
+                                f"grant develop on application package {self.package_name} to role {self.app_role}"
+                            )
 
-            try:
-                self._execute_query(
-                    dedent(
-                        f"""\
-                    create application {self.app_name}
-                        from application package {self.package_name} {using_clause}
-                        comment = {SPECIAL_COMMENT}
-                    """
-                    )
-                )
-
-                # ensure debug_mode is up-to-date
-                if using_clause:
+                try:
                     self._execute_query(
-                        f"alter application {self.app_name} set debug_mode = {self.debug_mode}"
+                        dedent(
+                            f"""\
+                        create application {self.app_name}
+                            from application package {self.package_name} {using_clause}
+                            comment = {SPECIAL_COMMENT}
+                        """
+                        )
                     )
-            except ProgrammingError as err:
-                generic_sql_error_handler(err)
+
+                    # ensure debug_mode is up-to-date
+                    if using_clause:
+                        self._execute_query(
+                            f"alter application {self.app_name} set debug_mode = {self.debug_mode}"
+                        )
+                except ProgrammingError as err:
+                    generic_sql_error_handler(err)
 
     def process(
         self,
