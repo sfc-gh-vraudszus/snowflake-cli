@@ -84,6 +84,8 @@ def test_bundle_of_invalid_entity_type(temp_dir):
         ws_manager.perform_action("app", EntityActions.BUNDLE)
 
 
+# PJ-comment: what do you actually need to test here? just the version number top of file?
+# PJ-comment: misleading to think everything in v2 is tested here
 def test_migration_already_v2(
     runner,
     project_directory,
@@ -105,6 +107,7 @@ def test_migrations_with_multiple_entities(
     assert Path("snowflake_V1.yml").read_text() == os_agnostic_snapshot
 
 
+# PJ-question: we are testing that the warning gets thrown here
 @pytest.mark.parametrize(
     "project_directory_name", ["snowpark_templated_v1", "streamlit_templated_v1"]
 )

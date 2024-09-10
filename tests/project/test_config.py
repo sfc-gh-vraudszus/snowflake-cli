@@ -85,6 +85,7 @@ def test_does_not_accept_unknown_fields(project_definition_files):
     )
 
 
+# PJ-Comment: if thiss is to only check all fields get loaded properly, we can generate, load, delete instead?
 @pytest.mark.parametrize(
     "project_definition_files",
     [

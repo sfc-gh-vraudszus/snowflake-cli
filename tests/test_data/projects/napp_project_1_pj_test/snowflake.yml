@@ -1,0 +1,8 @@
+definition_version: 1
+native_app:
+  name: myapp
+  artifacts:
+    - README.md
+  application:
+    name: myapp_polly
+    debug: true

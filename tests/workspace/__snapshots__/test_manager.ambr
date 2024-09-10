@@ -168,15 +168,6 @@
   
   '''
 # ---
-# name: test_migrating_native_app_raises_error
-  '''
-  +- Error ----------------------------------------------------------------------+
-  | Your project file contains a native app definition. Conversion of Native     |
-  | apps is not yet supported                                                    |
-  +------------------------------------------------------------------------------+
-  
-  '''
-# ---
 # name: test_migrations_with_multiple_entities
   '''
   definition_version: '2'

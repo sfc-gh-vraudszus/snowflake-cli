@@ -51,6 +51,7 @@ def project_definition_copy(test_projects_path):
     yield copy_project_definition
 
 
+# PJ-comment: This doesn't need this specific project file does it
 def test_error_missing_template_yml(runner, test_projects_path, temp_dir):
     # no template.yml
     project_name = "example_streamlit_no_defaults"

@@ -1,3 +1,0 @@
-manifest_version: 1 # required
-artifacts:
-  setup_script: setup.sql

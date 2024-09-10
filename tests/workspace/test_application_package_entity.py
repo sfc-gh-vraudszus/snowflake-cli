@@ -39,6 +39,8 @@ from tests.nativeapp.utils import (
 )
 
 
+# PJ-comment: we're loading the yml in the arrange and not as part of the "action", so we're not actualy testing the loading
+# of yml file properly. Doesn't need to load from disk
 def _get_app_pkg_entity(project_directory):
     with project_directory("workspaces_simple") as project_root:
         with Path(project_root / "snowflake.yml").open() as definition_file_path:

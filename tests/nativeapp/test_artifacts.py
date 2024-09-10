@@ -870,7 +870,12 @@ def test_bundle_map_ignores_sources_in_deploy_root(bundle_map):
     )
 
 
-@pytest.mark.parametrize("project_definition_files", ["napp_project_1"], indirect=True)
+# PJ - START?
+
+
+@pytest.mark.parametrize(
+    "project_definition_files", ["napp_project_1_pj_test"], indirect=True
+)
 def test_napp_project_1_artifacts(project_definition_files, os_agnostic_snapshot):
     project_root = project_definition_files[0].parent
     native_app = load_project(project_definition_files).project_definition.native_app
@@ -893,7 +898,10 @@ def test_napp_project_1_artifacts(project_definition_files, os_agnostic_snapshot
         assert_dir_snapshot(deploy_root.relative_to(local_path), os_agnostic_snapshot)
 
 
-@pytest.mark.parametrize("project_definition_files", ["napp_project_1"], indirect=True)
+# PJ - comment: only needs the parent path. Should be a better way to handle this.
+@pytest.mark.parametrize(
+    "project_definition_files", ["napp_project_1_pj_test"], indirect=True
+)
 def test_source_not_found(project_definition_files):
     project_root = project_definition_files[0].parent
     with pytest.raises(SourceNotFoundError):
@@ -940,7 +948,9 @@ def test_outside_deploy_root_three_ways(project_definition_files):
         )
 
 
-@pytest.mark.parametrize("project_definition_files", ["napp_project_1"], indirect=True)
+@pytest.mark.parametrize(
+    "project_definition_files", ["napp_project_1_pj_test"], indirect=True
+)
 def test_bad_deploy_root(project_definition_files):
     project_root = project_definition_files[0].parent
     with pytest.raises(DeployRootError):
@@ -961,7 +971,9 @@ def test_bad_deploy_root(project_definition_files):
         )
 
 
-@pytest.mark.parametrize("project_definition_files", ["napp_project_1"], indirect=True)
+@pytest.mark.parametrize(
+    "project_definition_files", ["napp_project_1_pj_test"], indirect=True
+)
 def test_no_artifacts(project_definition_files):
     project_root = project_definition_files[0].parent
     with pytest.raises(ArtifactError):
@@ -987,6 +999,7 @@ def test_too_many_files(project_definition_files):
         )
 
 
+# PJ - END?
 @pytest.mark.skipif(
     IS_WINDOWS, reason="Symlinks on Windows are restricted to Developer mode or admins"
 )

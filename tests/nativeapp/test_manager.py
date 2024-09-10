@@ -667,13 +667,13 @@ def test_get_snowsight_url_with_pdf_warehouse(
     "project_definition_files, warehouse, expected_calls, fallback_side_effect",
     [
         (
-            "napp_project_1",
+            "napp_project_1_pj_test",
             "MockWarehouse",
             [mock.call("select current_warehouse()", cursor_class=DictCursor)],
             [None],
         ),
         (
-            "napp_project_1",
+            "napp_project_1_pj_test",
             None,
             [],
             [],
@@ -705,11 +705,10 @@ def test_get_snowsight_url_without_pdf_warehouse(
     ] + fallback_side_effect
 
     native_app_manager = _get_na_manager(str(working_dir))
+
     if warehouse:
-        assert (
-            native_app_manager.get_snowsight_url()
-            == "https://host/organization/account/#/apps/application/MYAPP_POLLY"
-        )
+        abc = native_app_manager.get_snowsight_url()
+        assert abc == "https://host/organization/account/#/apps/application/MYAPP_POLLY"
     else:
         with pytest.raises(ClickException) as err:
             native_app_manager.get_snowsight_url()
