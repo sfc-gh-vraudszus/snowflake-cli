@@ -162,3 +162,6 @@ markers = [
 
 [tool.codespell]
 skip = 'tests/*'
+
+[tool.mypy]
+mypy_path = "src"
