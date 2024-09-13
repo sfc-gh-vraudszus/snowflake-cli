@@ -24,6 +24,9 @@ from snowflake.cli._plugins.nativeapp.entities.application_package import (
     ApplicationPackageEntity,
     ApplicationPackageEntityModel,
 )
+from snowflake.cli.api.project.schemas.entities.project_entity_model import (
+    ProjectEntityModel,
+)
 from snowflake.cli._plugins.snowpark.snowpark_entity import (
     FunctionEntity,
     ProcedureEntity,
@@ -50,6 +53,7 @@ EntityModel = Union[
     StreamlitEntityModel,
     FunctionEntityModel,
     ProcedureEntityModel,
+    ProjectEntityModel,
 ]
 
 ALL_ENTITIES: List[Entity] = [*get_args(Entity)]
