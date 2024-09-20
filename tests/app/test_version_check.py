@@ -93,7 +93,7 @@ def test_get_version_from_pypi(mock_get):
     mock_get.return_value = r
     assert _VersionCache()._get_version_from_pypi() == "1.2.3"  # noqa
     mock_get.assert_called_once_with(
-        "https://pypi.org/pypi/snowflake-cli-labs/json",
+        "https://pypi.org/pypi/snowflake-cli/json",
         headers={"Content-Type": "application/vnd.pypi.simple.v1+json"},
         timeout=3,
     )
