@@ -333,7 +333,7 @@ class StageManager(SqlExecutionMixin):
             return self._execute_query(f"remove {quoted_stage_name}")
 
     def create(self, fqn: FQN, comment: Optional[str] = None) -> SnowflakeCursor:
-        query = f"create stage if not exists {fqn.sql_identifier}"
+        query = f"create or replace stage {fqn.sql_identifier}"
         if comment:
             query += f" comment='{comment}'"
         return self._execute_query(query)
