@@ -35,5 +35,5 @@ class ProjectManager(SqlExecutionMixin):
         return self._execute_queries(queries=queries)
 
     def create_version(self, project_name: FQN, stage_name: FQN):
-        query = f"ALTER PROJECT {project_name.sql_identifier} ADD VERSION FROM @{stage_name.identifier}"
+        query = f"ALTER PROJECT {project_name.identifier} ADD VERSION FROM @{stage_name.identifier}"
         return self._execute_query(query=query)
