@@ -26,7 +26,7 @@ from snowflake.cli._plugins.nativeapp.application_package_entity import (
 from snowflake.cli._plugins.nativeapp.application_package_entity_model import (
     ApplicationPackageEntityModel,
 )
-from snowflake.cli.api.project.schemas.entities.project_entity_model import (
+from snowflake.cli._plugins.project.project_entity_model import (
     ProjectEntityModel,
 )
 from snowflake.cli._plugins.snowpark.snowpark_entity import (
