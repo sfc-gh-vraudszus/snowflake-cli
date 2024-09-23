@@ -5,9 +5,7 @@ from typing import Dict, List, Optional
 from click import ClickException, UsageError
 from snowflake.cli.api.commands.common import Variable
 from snowflake.cli.api.exceptions import NoProjectDefinitionError
-from snowflake.cli.api.project.schemas.entities.streamlit_entity_model import (
-    StreamlitEntityModel,
-)
+from snowflake.cli.api.project.schemas.entities.common import EntityModelBase
 
 
 def parse_key_value_variables(variables: Optional[List[str]]) -> List[Variable]:
@@ -30,7 +28,7 @@ def get_entity_for_operation(
     project_definition,
     entity_type: str,
 ):
-    entities: Dict[str, StreamlitEntityModel] = project_definition.get_entities_by_type(
+    entities: Dict[str, EntityModelBase] = project_definition.get_entities_by_type(
         entity_type=entity_type
     )
     if not entities:
