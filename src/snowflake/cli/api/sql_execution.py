@@ -76,10 +76,8 @@ class SqlExecutor:
         return stream_generator if return_cursors else list()
 
     def _execute_query(self, query: str, **kwargs):
-        # TODO: remove once queries are known
-        print(query)
-        # *_, last_result = self._execute_queries(query, **kwargs)
-        # return last_result
+        *_, last_result = self._execute_queries(query, **kwargs)
+        return last_result
 
     def _execute_queries(self, queries: str, **kwargs):
         return list(self._execute_string(dedent(queries), **kwargs))
