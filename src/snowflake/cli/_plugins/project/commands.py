@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import logging
+import os
 
 import typer
 from snowflake.cli._plugins.project.manager import ProjectManager
@@ -97,7 +98,9 @@ def create_version(
         for file in project.artifacts:
             cli_console.step(f"Uploading {file} to {stage_name}")
             if isinstance(file, str):
-                sm.put(local_path=file, stage_path=stage_name)
+                directory = os.path.dirname(file)
+                path = f"{stage_name}/{directory}" if directory else stage_name
+                sm.put(local_path=file, stage_path=path)
             else:
                 sm.put(
                     local_path=file.local,
