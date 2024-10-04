@@ -337,7 +337,7 @@ class StageManager(SqlExecutionMixin):
         self, fqn: FQN, comment: Optional[str] = None, temporary: bool = False
     ) -> SnowflakeCursor:
         temporary_str = "temporary" if temporary else ""
-        query = f"create {temporary_str} stage if not exists {fqn.sql_identifier}"
+        query = f"create or replace {temporary_str} stage {fqn.sql_identifier}"
         if comment:
             query += f" comment='{comment}'"
         return self._execute_query(query)
